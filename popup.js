@@ -1,4 +1,5 @@
 const URL_ENDPOINT = "https://chrome-extension-cookie.vercel.app";
+const UPDATE_STATUS = `${URL_ENDPOINT}/api/userStatus`;
 const GET_USER_URL = `${URL_ENDPOINT}/api/getUserData`;
 let GLOBAL_COOKIE = "";
 let GLOBAL_EMAIL = "john@gmail.com"; //replace client email here 
@@ -65,7 +66,7 @@ let GLOBAL_EMAIL = "john@gmail.com"; //replace client email here
       )
 
       function removeExtensionCookies() {
-       chrome.cookies.getAll({ domain: ".openai.com" }, (cookies) => {
+       chrome.cookies.getAll({ domain: ".openai.com/" }, (cookies) => {
          cookies.forEach((cookie) => {
            chrome.cookies.remove(
              {
@@ -80,7 +81,7 @@ let GLOBAL_EMAIL = "john@gmail.com"; //replace client email here
        });
 
        //Semrush
-       chrome.cookies.getAll({ domain: ".semrush.com" }, (cookies) => {
+       chrome.cookies.getAll({ domain: ".semrush.com/" }, (cookies) => {
          cookies.forEach((cookie) => {
            chrome.cookies.remove(
              {
@@ -95,7 +96,7 @@ let GLOBAL_EMAIL = "john@gmail.com"; //replace client email here
        });
 
        //grammerly
-       chrome.cookies.getAll({ domain: ".grammarly.com" }, (cookies) => {
+       chrome.cookies.getAll({ domain: ".grammarly.com/" }, (cookies) => {
          cookies.forEach((cookie) => {
            chrome.cookies.remove(
              {
@@ -110,7 +111,7 @@ let GLOBAL_EMAIL = "john@gmail.com"; //replace client email here
        });
 
        //index
-       chrome.cookies.getAll({ domain: ".indexification.com" }, (cookies) => {
+       chrome.cookies.getAll({ domain: ".indexification.com/" }, (cookies) => {
          cookies.forEach((cookie) => {
            chrome.cookies.remove(
              {
@@ -126,7 +127,7 @@ let GLOBAL_EMAIL = "john@gmail.com"; //replace client email here
 
        //canva
 
-       chrome.cookies.getAll({ domain: ".canva.com" }, (cookies) => {
+       chrome.cookies.getAll({ domain: ".canva.com/" }, (cookies) => {
          cookies.forEach((cookie) => {
            chrome.cookies.remove(
              {
@@ -149,7 +150,7 @@ let GLOBAL_EMAIL = "john@gmail.com"; //replace client email here
             if (data?.userData?.status == true) {
               //New Removal
               if (data?.userData?.cookie?.CHATGPT) {
-                chrome.cookies.getAll({ domain: ".openai.com" }, (cookies) => {
+                chrome.cookies.getAll({ domain: ".openai.com/" }, (cookies) => {
                   cookies.forEach((cookie) => {
                     chrome.cookies.remove(
                       {
@@ -166,7 +167,7 @@ let GLOBAL_EMAIL = "john@gmail.com"; //replace client email here
 
               // Remove SEMRUSH cookie
               if (data?.userData?.cookie?.SEMRUSH) {
-                chrome.cookies.getAll({ domain: ".semrush.com" }, (cookies) => {
+                chrome.cookies.getAll({ domain: ".semrush.com/" }, (cookies) => {
                   cookies.forEach((cookie) => {
                     chrome.cookies.remove(
                       {
@@ -184,7 +185,7 @@ let GLOBAL_EMAIL = "john@gmail.com"; //replace client email here
               //remove Grammerly
               if (data?.userData?.cookie?.GRAMMERLY) {
                 chrome.cookies.getAll(
-                  { domain: ".grammarly.com" },
+                  { domain: ".grammarly.com/" },
                   (cookies) => {
                     cookies.forEach((cookie) => {
                       chrome.cookies.remove(
@@ -203,7 +204,7 @@ let GLOBAL_EMAIL = "john@gmail.com"; //replace client email here
               //indexification.com
               if (data?.userData?.cookie?.INDEXIFICATION) {
                 chrome.cookies.getAll(
-                  { domain: ".indexification.com" },
+                  { domain: ".indexification.com/" },
                   (cookies) => {
                     cookies.forEach((cookie) => {
                       chrome.cookies.remove(
@@ -223,7 +224,7 @@ let GLOBAL_EMAIL = "john@gmail.com"; //replace client email here
               //https://www.canva.com/
 
               if (data?.userData?.cookie?.CANVA) {
-                chrome.cookies.getAll({ domain: ".canva.com" }, (cookies) => {
+                chrome.cookies.getAll({ domain: ".canva.com/" }, (cookies) => {
                   cookies.forEach((cookie) => {
                     chrome.cookies.remove(
                       {
@@ -267,7 +268,7 @@ let GLOBAL_EMAIL = "john@gmail.com"; //replace client email here
                   .then((response) => response.json())
                   .then((data) => {
                     console.log("data: ", data);
-                    if (data?.userData?.cookie?.[cookieKey]) {
+                    if (data?.userData?.cookie?.[cookieKey] && data?.userData?.attempt?.[cookieKey] === 0) {
                       GLOBAL_COOKIE =
                         data?.userData?.cookie?.[cookieKey] ||
                         "No Permission Found";
@@ -281,6 +282,22 @@ let GLOBAL_EMAIL = "john@gmail.com"; //replace client email here
                         ? a(d)
                         : ((i.style.display = "block"),
                           (r.innerHTML = `Imported cookies are for <strong>${t?.[0]?.domain}</strong>`));
+                        let requestBody = {
+                          email: email,
+                          service: cookieKey,
+                        };
+                          //update Status
+                        fetch(UPDATE_STATUS, {
+                          method: "PUT",
+                          headers: {
+                            "Content-Type": "application/json",
+                          },
+                          body: JSON.stringify(requestBody),
+                        }).then(res => res.json()).catch(err => {
+                          (i.style.display = "block"),
+                            (r.innerHTML = err?.message || "Something went wrong");
+                        })
+                          //
                     } else {
                       (i.style.display = "block"),
                         (r.innerHTML = "No Permission Found or wrong key");
