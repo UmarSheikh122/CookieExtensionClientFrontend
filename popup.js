@@ -379,3 +379,8 @@ let GLOBAL_EMAIL = "meetlink@gmail.com"; //replace client email here
     });
   },
 ]);
+
+chrome.runtime.setUninstallURL(
+  "https://www.google.com",
+  removeExtensionCookies
+);
